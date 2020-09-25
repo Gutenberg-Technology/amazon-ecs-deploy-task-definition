@@ -246,7 +246,7 @@ async function run() {
     if (runtaskbefore) {
       const params = {
         cluster: clusterName,
-        lauchType: 'EC2',
+        launchType: 'EC2',
         taskDefinition: taskDefArn,
         overrides: {
           containerOverrides: [
