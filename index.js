@@ -216,6 +216,7 @@ async function run() {
     const taskDefinitionFile = core.getInput('task-definition', { required: true });
     const service = core.getInput('service', { required: false });
     const cluster = core.getInput('cluster', { required: false });
+    const runtaskbefore = core.getInput('runtaskbefore', {required: false })
     const waitForService = core.getInput('wait-for-service-stability', { required: false });
     let waitForMinutes = parseInt(core.getInput('wait-for-minutes', { required: false })) || 30;
     if (waitForMinutes > MAX_WAIT_MINUTES) {
@@ -240,6 +241,31 @@ async function run() {
     }
     const taskDefArn = registerResponse.taskDefinition.taskDefinitionArn;
     core.setOutput('task-definition-arn', taskDefArn);
+
+    //Run Task Before (migration)
+    if (runtaskbefore) {
+      const params = {
+        cluster: clusterName,
+        lauchType: 'EC2',
+        taskDefinition: taskDefArn,
+        overrides: {
+          containerOverrides: [
+            {
+              command: runtaskbefore.Split(' ')
+            }
+          ]
+        }
+      }
+
+      ecs.runTask(params).promise().then((result) => {
+        const runTaskArn = result.tasks[0].taskArn;
+        console.info(`Checking to make sure task arn ${taskArn} is RUNNING..`);
+        ecs.waitFor('tasksRunning', {
+          tasks: [ runTaskArn ],
+          cluster: clustername
+        }).promise();
+      })
+    }
 
     // Update the service with the new task definition
     if (service) {
