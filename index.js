@@ -259,8 +259,8 @@ async function run() {
 
       ecs.runTask(params).promise().then((result) => {
         const runTaskArn = result.tasks[0].taskArn;
-        console.info(`Checking to make sure task arn ${taskArn} is RUNNING..`);
-        ecs.waitFor('tasksRunning', {
+        console.info(`Checking to make sure task arn ${taskArn} is STOPPED..`);
+        ecs.waitFor('tasksStopped', {
           tasks: [ runTaskArn ],
           cluster: clustername
         }).promise();
