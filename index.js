@@ -244,6 +244,7 @@ async function run() {
 
     //Run Task Before (migration)
     if (runtaskbefore) {
+      const clusterName = cluster ? cluster : 'default';
       const params = {
         cluster: clusterName,
         launchType: 'EC2',
@@ -259,10 +260,10 @@ async function run() {
 
       ecs.runTask(params).promise().then((result) => {
         const runTaskArn = result.tasks[0].taskArn;
-        console.info(`Checking to make sure task arn ${taskArn} is STOPPED..`);
+        console.info(`Checking to make sure task arn ${runTaskArn} is STOPPED..`);
         ecs.waitFor('tasksStopped', {
           tasks: [ runTaskArn ],
-          cluster: clustername
+          cluster: clusterName
         }).promise();
       })
     }
